@@ -1,0 +1,13 @@
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/android/.gradle/
+**/android/local.properties
+**/.idea/
+**/*.iml
+flutter/bin/cache/
+*.tar.xz
+.DS_Store
+Thumbs.db
