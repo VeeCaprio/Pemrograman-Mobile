@@ -1,0 +1,27 @@
+# Environment
+.env
+
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE
+.idea/
+*.iml
+
+# Android local configuration
+local.properties
+.gradle/
+
+# Documentation screenshots
+screenshots/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/

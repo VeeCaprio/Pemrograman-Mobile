@@ -1,0 +1,353 @@
+import 'package:flutter/material.dart';
+
+import '../state/pengaturan.dart';
+import '../utils/format.dart';
+import 'status_koneksi_page.dart';
+
+class PengaturanPage extends StatelessWidget {
+  final Pengaturan pengaturan;
+
+  const PengaturanPage({
+    super.key,
+    required this.pengaturan,
+  });
+
+  Future<void> _aturTarget(BuildContext context) async {
+    final hasil = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) {
+        final controller = TextEditingController(
+          text: pengaturan.targetTabungan.toString(),
+        );
+        final formKey = GlobalKey<FormState>();
+
+        return AlertDialog(
+          title: const Text('Target Tabungan Harian'),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: controller,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Target dalam Rupiah',
+                prefixText: 'Rp ',
+                border: OutlineInputBorder(),
+                helperText: 'Contoh: 20000',
+              ),
+              validator: (nilai) {
+                final angka = int.tryParse(nilai?.trim() ?? '');
+                if (angka == null || angka <= 0) {
+                  return 'Masukkan nominal lebih dari nol.';
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  Navigator.pop(
+                    dialogContext,
+                    int.parse(controller.text.trim()),
+                  );
+                }
+              },
+              child: const Text('Simpan'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (hasil == null || !context.mounted) return;
+
+    await pengaturan.ubahTarget(hasil);
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Target tabungan berhasil diperbarui.'),
+      ),
+    );
+  }
+
+  Future<void> _aturUrlApi(BuildContext context) async {
+    final controller = TextEditingController(
+      text: pengaturan.urlApi,
+    );
+    final formKey = GlobalKey<FormState>();
+
+    final hasil = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Alamat API Backend'),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: controller,
+            autofocus: true,
+            keyboardType: TextInputType.url,
+            decoration: const InputDecoration(
+              labelText: 'URL API',
+              hintText: 'http://10.0.2.2:8000',
+              border: OutlineInputBorder(),
+              helperText: 'Masukkan alamat backend TabungKu.',
+            ),
+            validator: (nilai) {
+              final uri = Uri.tryParse(nilai?.trim() ?? '');
+
+              if (uri == null ||
+                  !uri.hasScheme ||
+                  !uri.hasAuthority ||
+                  !['http', 'https'].contains(uri.scheme)) {
+                return 'Masukkan URL HTTP/HTTPS yang valid.';
+              }
+
+              return null;
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(dialogContext, controller.text.trim());
+              }
+            },
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+
+    if (hasil == null || !context.mounted) return;
+
+    try {
+      await pengaturan.ubahUrlApi(hasil);
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('URL API berhasil disimpan.'),
+        ),
+      );
+    } on ArgumentError catch (error) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message.toString())),
+      );
+    }
+  }
+
+  Future<void> _pilihWarna(BuildContext context) async {
+    const pilihanWarna = <Color>[
+      Colors.teal,
+      Colors.blue,
+      Colors.indigo,
+      Colors.purple,
+      Colors.pink,
+      Colors.orange,
+      Colors.green,
+      Colors.red,
+    ];
+
+    final warna = await showDialog<Color>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Warna Tema'),
+        content: Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: pilihanWarna.map((warna) {
+            final terpilih = warna.value == pengaturan.warnaTema.value;
+
+            return InkWell(
+              onTap: () => Navigator.pop(dialogContext, warna),
+              borderRadius: BorderRadius.circular(30),
+              child: CircleAvatar(
+                backgroundColor: warna,
+                child: terpilih
+                    ? const Icon(Icons.check, color: Colors.white)
+                    : null,
+              ),
+            );
+          }).toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Batal'),
+          ),
+        ],
+      ),
+    );
+
+    if (warna == null || !context.mounted) return;
+
+    await pengaturan.ubahWarnaTema(warna);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: pengaturan,
+      builder: (context, _) {
+        final tema = Theme.of(context);
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Pengaturan'),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 28,
+                        backgroundColor: pengaturan.warnaTema,
+                        child: const Icon(
+                          Icons.savings_rounded,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'TabungKu',
+                              style: tema.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text('Kelola kegiatan dan keuanganmu'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Preferensi',
+                style: tema.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Card(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.savings_outlined),
+                      title: const Text('Target tabungan harian'),
+                      subtitle: Text(
+                        formatRupiah(pengaturan.targetTabungan),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => _aturTarget(context),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.wifi_tethering_outlined),
+                      title: const Text('Status koneksi'),
+                      subtitle:
+                          const Text('Periksa koneksi API dan database MySQL'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => StatusKoneksiPage(
+                              pengaturan: pengaturan,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1),
+                    SwitchListTile(
+                      secondary: const Icon(Icons.dark_mode_outlined),
+                      title: const Text('Mode gelap'),
+                      subtitle: const Text(
+                        'Gunakan tampilan gelap pada aplikasi',
+                      ),
+                      value: pengaturan.modeGelap,
+                      onChanged: (aktif) {
+                        pengaturan.ubahModeGelap(aktif);
+                      },
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.palette_outlined),
+                      title: const Text('Warna tema'),
+                      subtitle: const Text(
+                        'Sesuaikan warna utama aplikasi',
+                      ),
+                      trailing: CircleAvatar(
+                        radius: 13,
+                        backgroundColor: pengaturan.warnaTema,
+                      ),
+                      onTap: () => _pilihWarna(context),
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.cloud_outlined),
+                      title: const Text('URL API Backend'),
+                      subtitle: Text(
+                        pengaturan.urlApi,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => _aturUrlApi(context),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: const Text('Tentang TabungKu'),
+                  subtitle: const Text(
+                    'Aplikasi pencatat kegiatan dan keuangan harian.',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Center(
+                child: Text(
+                  'TabungKu • Kelola hari ini, rencanakan esok.',
+                  textAlign: TextAlign.center,
+                  style: tema.textTheme.bodySmall,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
