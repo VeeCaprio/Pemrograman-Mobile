@@ -1,3 +1,7 @@
+
+https://www.figma.com/design/jEjn8lTnWzSa15g89scaEY/Attendansystem-%E2%80%94-UI-UX-Mockup---Prototype?node-id=0-1&p=f&t=VuF7vtU9D8m8aoF6-0
+https://www.figma.com/design/jEjn8lTnWzSa15g89scaEY/Attendansystem-%E2%80%94-UI-UX-Mockup---Prototype?node-id=4-2&t=pqk8I2xDcCNAWwjs-0
+
 Attendansystem — Mobile Attendance App
 Aplikasi absensi kantor digital untuk Android yang dirancang menggunakan Flutter (Dart). Aplikasi Pegawai direncanakan terhubung dengan backend Laravel 12, sementara pengelolaan data dan approval Admin tetap dilakukan melalui Filament v3.
 Status dokumentasi: README ini disusun dari PRD Mobile dan rancangan UI/UX Figma. Struktur source code, status implementasi fitur, endpoint API, dan hasil pengujian belum diverifikasi dari repository pada sesi ini. Jangan menganggap seluruh fitur sudah berjalan sebelum diuji.
