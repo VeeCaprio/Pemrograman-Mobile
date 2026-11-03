@@ -1,5 +1,7 @@
 
 https://www.figma.com/design/jEjn8lTnWzSa15g89scaEY/Attendansystem-%E2%80%94-UI-UX-Mockup---Prototype?node-id=0-1&p=f&t=VuF7vtU9D8m8aoF6-0
+
+
 https://www.figma.com/design/jEjn8lTnWzSa15g89scaEY/Attendansystem-%E2%80%94-UI-UX-Mockup---Prototype?node-id=4-2&t=pqk8I2xDcCNAWwjs-0
 
 Attendansystem — Mobile Attendance App
